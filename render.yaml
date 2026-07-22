@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: otp-auth
+    runtime: node
+    rootDir: backend
+    buildCommand: "npm install && npm install --prefix ../frontend && npm run build --prefix ../frontend"
+    startCommand: "node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
