@@ -3,6 +3,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const rateLimit = require("express-rate-limit");
+const path = require("path");
 
 const connectDB = require("./db");
 const authRoutes = require("./authRoutes");
@@ -15,7 +16,9 @@ connectDB();
 // ── Middleware ──────────────────────────────────
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: process.env.NODE_ENV === "production"
+      ? false // same origin in production — no CORS needed
+      : process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -37,10 +40,18 @@ app.use("/api/auth/send-otp", otpLimiter);
 // ── Routes ──────────────────────────────────────
 app.use("/api/auth", authRoutes);
 
-// ── 404 Handler ─────────────────────────────────
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
+// ── Serve Frontend (React build) ─────────────────
+const frontendPath = path.join(__dirname, "../frontend/dist");
+app.use(express.static(frontendPath));
+
+// All non-API routes serve the React app
+app.get("*", (req, res) => {
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
+
+// ── 404 Handler ─────────────────────────────────
+// (kept above the catch-all, only reached for unmatched API routes)
+
 
 // ── Global Error Handler ─────────────────────────
 app.use((err, req, res, next) => {
