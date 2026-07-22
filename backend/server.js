@@ -10,6 +10,9 @@ const authRoutes = require("./authRoutes");
 
 const app = express();
 
+// Trust Render's proxy (required for rate limiting behind a reverse proxy)
+app.set("trust proxy", 1);
+
 // Connect to MongoDB
 connectDB();
 
