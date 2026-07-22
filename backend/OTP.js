@@ -4,11 +4,15 @@ const otpSchema = new mongoose.Schema(
   {
     email: {
       type: String,
-      required: true,
       index: true,
+      sparse: true, // not required — only used for email OTPs
+    },
+    phone: {
+      type: String,
+      index: true,
+      sparse: true, // not required — only used for phone OTPs
     },
     otp: {
-      // stored as bcrypt hash
       type: String,
       required: true,
     },
@@ -22,7 +26,7 @@ const otpSchema = new mongoose.Schema(
   }
 );
 
-// TTL index: MongoDB automatically removes documents after expiresAt
+// TTL index: MongoDB auto-deletes expired OTPs
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 module.exports = mongoose.model("OTP", otpSchema);
